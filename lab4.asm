@@ -10,12 +10,18 @@ N_9 equ 10011000b
 N_5 equ 10100100b
 N_1 equ 11111001b
 N_0 equ 11000000b
+N_3 equ 11000000b
 BLANK equ 11111111b
 L_E equ 10000110b
 N_4 equ 10011001b
 L_D equ 10100001b
 L_A equ 10001000b
 L_C equ 11000110b
+L_H equ 11000110b
+L_L equ 11000110b
+L_O equ 11000110b
+L_P equ 11000110b
+L_N equ 11000110b
 
 org 0
 	ljmp init
@@ -34,29 +40,29 @@ main_poll:
 	mov R1, A
 cont:
 	; Execute last command
-	cnje R1, #0, cc1 ; branches to the specified destination if their values are not equal
+	CJNE R1, #0, cc1 ; branches to the specified destination if their values are not equal
 	lcall case_000
 cc1: 
-	cnje R1, #1, cc2
+	CJNE R1, #1, cc2
 	lcall case_001
 cc2: 
-	cnje R1, #2, cc3
+	CJNE R1, #2, cc3
 	lcall case_010
 cc3: 
-	cnje R1, #3, cc4
+	CJNE R1, #3, cc4
 	lcall case_011
 cc4: 
-	cnje R1, #4, cc5
+	CJNE R1, #4, cc5
 	lcall case_100
 cc5: 
-	cnje R1, #5, cc6
+	CJNE R1, #5, cc6
 	lcall case_101
 cc6: 
-	cnje R1, #6, cc7
+	CJNE R1, #6, cc7
 	lcall case_110
 cc7: 
 	lcall case_111
-	ljump main_poll
+	lcall main_poll
 	
 wait_1_sec:
     mov R3, #180  ; 90 is 5AH

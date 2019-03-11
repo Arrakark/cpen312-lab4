@@ -1,0 +1,480 @@
+                 -1   	$MODDE0CV ; Sets some sort of mode
+0000              1   ;  MODDDE2: Register definition for DE2-8052 softcore
+0000              2   ;
+0000              3   ;   Copyright (C) 2011  Jesus Calvino-Fraga, jesusc at ece.ubc.ca
+0000              4   ;
+0000              5   ;   This library is free software; you can redistribute it and/or
+0000              6   ;   modify it under the terms of the GNU Lesser General Public
+0000              7   ;   License as published by the Free Software Foundation; either
+0000              8   ;   version 2.1 of the License, or (at your option) any later version.
+0000              9   ;
+0000             10   ;   This library is distributed in the hope that it will be useful,
+0000             11   ;   but WITHOUT ANY WARRANTY; without even the implied warranty of
+0000             12   ;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+0000             13   ;   Lesser General Public License for more details.
+0000             14   ;
+0000             15   ;   You should have received a copy of the GNU Lesser General Public
+0000             16   ;   License along with this library; if not, write to the Free Software
+0000             17   ;   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+0000             18   ;
+0000             19       
+0000             20   P0     DATA  080H  ;PORT 0
+0000             21   SP     DATA  081H  ;STACK POINTER
+0000             22   DPL    DATA  082H  ;DATA POINTER 0 - LOW BYTE
+0000             23   DPH    DATA  083H  ;DATA POINTER 0 - HIGH BYTE
+0000             24   DPL1   DATA  084H  ;DATA POINTER 1 - LOW BYTE
+0000             25   DPH1   DATA  085H  ;DATA POINTER 1 - HIGH BYTE
+0000             26   DPS    DATA  086H  ;DATA POINTER SELECT. DPH1, DPL1 active when DPS.0=1
+0000             27   PCON   DATA  087H  ;POWER CONTROL
+0000             28   TCON   DATA  088H  ;TIMER CONTROL
+0000             29   TMOD   DATA  089H  ;TIMER MODE
+0000             30   TL0    DATA  08AH  ;TIMER 0 - LOW BYTE
+0000             31   TL1    DATA  08BH  ;TIMER 1 - LOW BYTE
+0000             32   TH0    DATA  08CH  ;TIMER 0 - HIGH BYTE
+0000             33   TH1    DATA  08DH  ;TIMER 1 - HIGH BYTE
+0000             34   P1     DATA  090H  ;PORT 1
+0000             35   SCON   DATA  098H  ;SERIAL PORT CONTROL
+0000             36   SBUF   DATA  099H  ;SERIAL PORT BUFFER
+0000             37   P2     DATA  0A0H  ;PORT 2
+0000             38   IE     DATA  0A8H  ;INTERRUPT ENABLE
+0000             39   P3     DATA  0B0H  ;PORT 3
+0000             40   IP     DATA  0B8H  ;INTERRUPT PRIORITY
+0000             41   T2CON  DATA  0C8H  ;TIMER 2 CONTROL
+0000             42   T2MOD  DATA  0C9H  ;TIMER 2 MODE
+0000             43   RCAP2L DATA  0CAH  ;TIMER 2 CAPTURE REGISTER - LOW BYTE
+0000             44   RCAP2H DATA  0CBH  ;TIMER 2 CAPTURE REGISTER - HIGH BYTE
+0000             45   TL2    DATA  0CCH  ;TIMER 2 - LOW BYTE
+0000             46   TH2    DATA  0CDH  ;TIMER 2 - HIGH BYTE
+0000             47   PSW    DATA  0D0H  ;PROGRAM STATUS WORD
+0000             48   ACC    DATA  0E0H  ;ACCUMULATOR
+0000             49   B      DATA  0F0H  ;MULTIPLICATION REGISTER
+0000             50   IT0    BIT   088H  ;TCON.0 - EXT. INTERRUPT 0 TYPE
+0000             51   IE0    BIT   089H  ;TCON.1 - EXT. INTERRUPT 0 EDGE FLAG
+0000             52   IT1    BIT   08AH  ;TCON.2 - EXT. INTERRUPT 1 TYPE
+0000             53   IE1    BIT   08BH  ;TCON.3 - EXT. INTERRUPT 1 EDGE FLAG
+0000             54   TR0    BIT   08CH  ;TCON.4 - TIMER 0 ON/OFF CONTROL
+0000             55   TF0    BIT   08DH  ;TCON.5 - TIMER 0 OVERFLOW FLAG
+0000             56   TR1    BIT   08EH  ;TCON.6 - TIMER 1 ON/OFF CONTROL
+0000             57   TF1    BIT   08FH  ;TCON.7 - TIMER 1 OVERFLOW FLAG
+0000             58   RI     BIT   098H  ;SCON.0 - RECEIVE INTERRUPT FLAG
+0000             59   TI     BIT   099H  ;SCON.1 - TRANSMIT INTERRUPT FLAG
+0000             60   RB8    BIT   09AH  ;SCON.2 - RECEIVE BIT 8
+0000             61   TB8    BIT   09BH  ;SCON.3 - TRANSMIT BIT 8
+0000             62   REN    BIT   09CH  ;SCON.4 - RECEIVE ENABLE
+0000             63   SM2    BIT   09DH  ;SCON.5 - SERIAL MODE CONTROL BIT 2
+0000             64   SM1    BIT   09EH  ;SCON.6 - SERIAL MODE CONTROL BIT 1
+0000             65   SM0    BIT   09FH  ;SCON.7 - SERIAL MODE CONTROL BIT 0
+0000             66   EX0    BIT   0A8H  ;IE.0 - EXTERNAL INTERRUPT 0 ENABLE
+0000             67   ET0    BIT   0A9H  ;IE.1 - TIMER 0 INTERRUPT ENABLE
+0000             68   EX1    BIT   0AAH  ;IE.2 - EXTERNAL INTERRUPT 1 ENABLE
+0000             69   ET1    BIT   0ABH  ;IE.3 - TIMER 1 INTERRUPT ENABLE
+0000             70   ES     BIT   0ACH  ;IE.4 - SERIAL PORT INTERRUPT ENABLE
+0000             71   ET2    BIT   0ADH  ;IE.5 - TIMER 2 INTERRUPT ENABLE
+0000             72   EA     BIT   0AFH  ;IE.7 - GLOBAL INTERRUPT ENABLE
+0000             73   RXD    BIT   0B0H  ;P3.0 - SERIAL PORT RECEIVE INPUT
+0000             74   TXD    BIT   0B1H  ;P3.1 - SERIAL PORT TRANSMIT OUTPUT
+0000             75   INT0   BIT   0B2H  ;P3.2 - EXTERNAL INTERRUPT 0 INPUT
+0000             76   INT1   BIT   0B3H  ;P3.3 - EXTERNAL INTERRUPT 1 INPUT
+0000             77   T0     BIT   0B4H  ;P3.4 - TIMER 0 COUNT INPUT
+0000             78   T1     BIT   0B5H  ;P3.5 - TIMER 1 COUNT INPUT
+0000             79   WR     BIT   0B6H  ;P3.6 - WRITE CONTROL FOR EXT. MEMORY
+0000             80   RD     BIT   0B7H  ;P3.7 - READ CONTROL FOR EXT. MEMORY
+0000             81   PX0    BIT   0B8H  ;IP.0 - EXTERNAL INTERRUPT 0 PRIORITY
+0000             82   PT0    BIT   0B9H  ;IP.1 - TIMER 0 PRIORITY
+0000             83   PX1    BIT   0BAH  ;IP.2 - EXTERNAL INTERRUPT 1 PRIORITY
+0000             84   PT1    BIT   0BBH  ;IP.3 - TIMER 1 PRIORITY
+0000             85   PS     BIT   0BCH  ;IP.4 - SERIAL PORT PRIORITY
+0000             86   PT2    BIT   0BDH  ;IP.5 - TIMER 2 PRIORITY
+0000             87   CAP2   BIT   0C8H  ;T2CON.0 - CAPTURE OR RELOAD SELECT
+0000             88   CNT2   BIT   0C9H  ;T2CON.1 - TIMER OR COUNTER SELECT
+0000             89   TR2    BIT   0CAH  ;T2CON.2 - TIMER 2 ON/OFF CONTROL
+0000             90   EXEN2  BIT   0CBH  ;T2CON.3 - TIMER 2 EXTERNAL ENABLE FLAG
+0000             91   TCLK   BIT   0CCH  ;T2CON.4 - TRANSMIT CLOCK SELECT
+0000             92   RCLK   BIT   0CDH  ;T2CON.5 - RECEIVE CLOCK SELECTT
+0000             93   EXF2   BIT   0CEH  ;T2CON.6 - EXTERNAL TRANSITION FLAG
+0000             94   TF2    BIT   0CFH  ;T2CON.7 - TIMER 2 OVERFLOW FLAG
+0000             95   P      BIT   0D0H  ;PSW.0 - ACCUMULATOR PARITY FLAG
+0000             96   OV     BIT   0D2H  ;PSW.2 - OVERFLOW FLAG
+0000             97   RS0    BIT   0D3H  ;PSW.3 - REGISTER BANK SELECT 0
+0000             98   RS1    BIT   0D4H  ;PSW.4 - REGISTER BANK SELECT 1
+0000             99   F0     BIT   0D5H  ;PSW.5 - FLAG 0
+0000            100   AC     BIT   0D6H  ;PSW.6 - AUXILIARY CARRY FLAG
+0000            101   CY     BIT   0D7H  ;PSW.7 - CARRY FLAG
+0000            102   
+0000            103   ; For the altera DE2 configured with an 8051/8052 softcore processor
+0000            104   ; we have the following extra registers:
+0000            105   
+0000            106   HEX0   DATA  091H ; Zero turns the segment on
+0000            107   HEX1   DATA  092H ; 
+0000            108   HEX2   DATA  093H ; 
+0000            109   HEX3   DATA  094H ; 
+0000            110   HEX4   DATA  08EH ;
+0000            111   HEX5   DATA  08FH ;
+0000            112   HEX6   DATA  096H ;
+0000            113   HEX7   DATA  097H ;
+0000            114   
+0000            115   P0MOD  DATA  09AH ; Input/output mode bits for port 0.  '1' sets the port to output mode.
+0000            116   P1MOD  DATA  09BH ; Input/output mode bits for port 1
+0000            117   P2MOD  DATA  09CH ; Input/output mode bits for port 2
+0000            118   P3MOD  DATA  09DH ; Input/output mode bits for port 3
+0000            119   
+0000            120   LEDRA  DATA  0E8H ; LEDs LEDR0 to LEDR7 (bit addressable, ex: LEDRA.1 for LEDR1)
+0000            121   LEDRB  DATA  095H ; LEDs LEDR8 to LEDR15
+0000            122   LEDRC  DATA  09EH ; LEDs LEDR16, LEDR15, and LEDG8
+0000            123   LEDG   DATA  0F8H ; LEDs LEDG0 to LEDG7 (bit addressable, ex: LEDG.3 for LEDG3)
+0000            124   SWA    DATA  0E8H ; Switches SW0 to SW7 (bit addressable, ex: SWA.1 for SW1)
+0000            125   SWB    DATA  095H ; Switches SW8 to SW15
+0000            126   SWC    DATA  09EH ; Switches SW16 and SW17
+0000            127   KEY    DATA  0F8H ; KEY1=KEY.1, KEY2=KEY.2, KEY3=KEY.3.  KEY0 is the reset button! 
+0000            128   
+0000            129   LCD_CMD   DATA 0D8H ;
+0000            130   LCD_DATA  DATA 0D9H ;
+0000            131   LCD_MOD   DATA 0DAH ; Write 0xff to make LCD_DATA an output
+0000            132   LCD_RW    BIT  0D8H ; '0' writes to LCD
+0000            133   LCD_EN    BIT  0D9H ; Toggle from '1' to '0'
+0000            134   LCD_RS    BIT  0DAH ; '0' for commands, '1' for data
+0000            135   LCD_ON    BIT  0DBH ; Write '1' to power the LCD
+0000            136   LCD_BLON  BIT  0DCH ; Write '1' to turn on back light
+0000            137   
+0000            138   FLASH_CMD  data 0DBH ; The control bits of the flash memory:
+0000            139   ; bit 0: FL_RST_N  Set to 1 for normal operation
+0000            140   ; bit 1: FL_WE_N
+0000            141   ; bit 2: FL_OE_N
+0000            142   ; bit 3: FL_CE_N
+0000            143   FLASH_DATA data 0DCH ; 8-bit data bus of flash memory.
+0000            144   FLASH_MOD  data 0DDH ; 0xff makes FLASH_DATA output.  0x00 makes FLASH_DATA input.
+0000            145   FLASH_ADD0 data 0E1H ; address bits 0 to 7.
+0000            146   FLASH_ADD1 data 0E2H ; address bits 8 to 15.
+0000            147   FLASH_ADD2 data 0E3H ; address bits 16 to 21.
+0000            148   
+0000              2            ; The display format depends on the states of switches SW2 down to SW0 after
+0000              3            ; they are latched by pressing pushbutton ‘KEY3’. In all the examples it is assumed that
+0000              4            ; the student number is “12345678”. 
+0000              5   
+0000              6            ; Define student number
+0000              7   N_2 equ 10100100b
+0000              8   N_6 equ 10000010b
+0000              9   N_9 equ 10011000b
+0000             10   N_5 equ 10100100b
+0000             11   N_1 equ 11111001b
+0000             12   N_0 equ 11000000b
+0000             13   N_3 equ 11000000b
+0000             14   BLANK equ 11111111b
+0000             15   L_E equ 10000110b
+0000             16   N_4 equ 10011001b
+0000             17   L_D equ 10100001b
+0000             18   L_A equ 10001000b
+0000             19   L_C equ 11000110b
+0000             20   L_H equ 11000110b
+0000             21   L_L equ 11000110b
+0000             22   L_O equ 11000110b
+0000             23   L_P equ 11000110b
+0000             24   L_N equ 11000110b
+0000             25   
+0000             26   org 0
+0000 020003      27            ljmp init
+0003             28            
+0003             29   init:
+0003 75817F      30            mov SP, #0x7f ; Initialize the stack
+0006 020009      31            ljmp main_poll
+0009             32            
+0009             33   main_poll:
+0009             34            ; Call different functions based on the latching of SW2 down to SW0
+0009 20FB05      35            jb KEY.3, cont ; jump if 1 (key is not pressed)
+000C             36            ; set new command (state of switches) into R1
+000C A9E8        37            mov R1, SWA
+000E E9          38            mov A, R1 ; need to invert buttons since they are active low
+000F F4          39            cpl A
+0010 F9          40            mov R1, A
+0011             41   cont:
+0011             42            ; Execute last command
+0011 B90003      43            CJNE R1, #0, cc1 ; branches to the specified destination if their values are not equal
+0014 120051      44            lcall case_000
+0017             45   cc1: 
+0017 B90103      46            CJNE R1, #1, cc2
+001A 120064      47            lcall case_001
+001D             48   cc2: 
+001D B90203      49            CJNE R1, #2, cc3
+0020 120077      50            lcall case_010
+0023             51   cc3: 
+0023 B90303      52            CJNE R1, #3, cc4
+0026 120120      53            lcall case_011
+0029             54   cc4: 
+0029 B90403      55            CJNE R1, #4, cc5
+002C 1201C9      56            lcall case_100
+002F             57   cc5: 
+002F B90503      58            CJNE R1, #5, cc6
+0032 1201F3      59            lcall case_101
+0035             60   cc6: 
+0035 B90603      61            CJNE R1, #6, cc7
+0038 120284      62            lcall case_110
+003B             63   cc7: 
+003B 1202B5      64            lcall case_111
+003E 120009      65            lcall main_poll
+0041             66            
+0041             67   wait_1_sec:
+0041 7BB4        68       mov R3, #180  ; 90 is 5AH
+0043 7AFA        69   L3: mov R2, #250 ; 250 is FAH 
+0045 79FA        70   L2: mov R1, #250
+0047 D9FE        71   L1: djnz R1, L1  ; 3 machine cycles-> 3*30ns*250=22.5us
+0049 20FBBD      72            jb KEY.3, main_poll ; if the key is pressed jump immediately back to the main loop
+004C DAF7        73       djnz R2, L2  ; 22.5us*250=5.625ms
+004E DBF3        74       djnz R3, L3  ; 5.625ms*180=1s (approximately)
+0050 22          75            ret
+0051             76   
+0051             77   case_000:
+0051             78            ; Display the six most significant digits of your student number using HEX5 down to
+0051             79            ; HEX0. For example: “123456” 
+0051 758FA4      80            mov HEX5, #N_2
+0054 758E82      81            mov HEX4, #N_6
+0057 759498      82            mov HEX3, #N_9
+005A 7593A4      83            mov HEX2, #N_5
+005D 7592F9      84            mov HEX1, #N_1
+0060 7591F9      85            mov HEX0, #N_1
+0063 22          86            ret
+0064             87   
+0064             88   
+0064             89   case_001:
+0064             90            ; Display the two least significant digits of your student number using HEX1 and
+0064             91            ; HEX0. Keep HEX5 down to HEX2 blank. For example: “ 78”
+0064 758FFF      92            mov HEX5, #BLANK
+0067 758EFF      93            mov HEX4, #BLANK
+006A 7594FF      94            mov HEX3, #BLANK
+006D 7593FF      95            mov HEX2, #BLANK
+0070 759282      96            mov HEX1, #N_6
+0073 7591C0      97            mov HEX0, #N_0
+0076 22          98            ret
+0077             99   
+0077            100   case_010:
+0077            101            ;  Starting with the six most significant digits of your student number, scroll one digit
+0077            102            ; to the left every second. This should keep going forever until the selection for SW2
+0077            103            ; down to SW0 is changed. For example: “123456”, “234567”, “345678”, “456781”,
+0077            104            ; “567812”, “678123”, etc. 
+0077 758FA4     105            mov HEX5, #N_2
+007A 758E82     106            mov HEX4, #N_6
+007D 759498     107            mov HEX3, #N_9
+0080 7593A4     108            mov HEX2, #N_5
+0083 7592F9     109            mov HEX1, #N_1
+0086 7591F9     110            mov HEX0, #N_1
+0089 120041     111            lcall wait_1_sec
+008C 758F82     112            mov HEX5, #N_6
+008F 758E98     113            mov HEX4, #N_9
+0092 7594A4     114            mov HEX3, #N_5
+0095 7593F9     115            mov HEX2, #N_1
+0098 7592F9     116            mov HEX1, #N_1
+009B 759182     117            mov HEX0, #N_6
+009E 120041     118            lcall wait_1_sec
+00A1 758F98     119            mov HEX5, #N_9
+00A4 758EA4     120            mov HEX4, #N_5
+00A7 7594F9     121            mov HEX3, #N_1
+00AA 7593F9     122            mov HEX2, #N_1
+00AD 759282     123            mov HEX1, #N_6
+00B0 7591C0     124            mov HEX0, #N_0
+00B3 120041     125            lcall wait_1_sec
+00B6 758FA4     126            mov HEX5, #N_5
+00B9 758EF9     127            mov HEX4, #N_1
+00BC 7594F9     128            mov HEX3, #N_1
+00BF 759382     129            mov HEX2, #N_6
+00C2 7592C0     130            mov HEX1, #N_0
+00C5 7591A4     131            mov HEX0, #N_2
+00C8 120041     132            lcall wait_1_sec
+00CB 758FF9     133            mov HEX5, #N_1
+00CE 758EF9     134            mov HEX4, #N_1
+00D1 759482     135            mov HEX3, #N_6
+00D4 7593C0     136            mov HEX2, #N_0
+00D7 7592A4     137            mov HEX1, #N_2
+00DA 759182     138            mov HEX0, #N_6
+00DD 120041     139            lcall wait_1_sec
+00E0 758FF9     140            mov HEX5, #N_1
+00E3 758E82     141            mov HEX4, #N_6
+00E6 7594C0     142            mov HEX3, #N_0
+00E9 7593A4     143            mov HEX2, #N_2
+00EC 759282     144            mov HEX1, #N_6
+00EF 759198     145            mov HEX0, #N_9
+00F2 120041     146            lcall wait_1_sec
+00F5 758F82     147            mov HEX5, #N_6
+00F8 758EC0     148            mov HEX4, #N_0
+00FB 7594A4     149            mov HEX3, #N_2
+00FE 759382     150            mov HEX2, #N_6
+0101 759298     151            mov HEX1, #N_9
+0104 7591A4     152            mov HEX0, #N_5
+0107 120041     153            lcall wait_1_sec
+010A 758FC0     154            mov HEX5, #N_0
+010D 758EA4     155            mov HEX4, #N_2
+0110 759482     156            mov HEX3, #N_6
+0113 759398     157            mov HEX2, #N_9
+0116 7592A4     158            mov HEX1, #N_5
+0119 7591F9     159            mov HEX0, #N_1
+011C 120041     160            lcall wait_1_sec
+011F 22         161            ret
+0120            162   
+0120            163   case_011:
+0120            164            ; Starting with the six most significant digits of your student number, scroll the digits
+0120            165            ; of your student number one digit to the right every second. This should keep going
+0120            166            ; forever until the selection for SW2 down to SW0 is changed. For example: “123456”,
+0120            167            ; “812345”, “781234”, “678123”, “567812”, “456781”, etc. 
+0120 758FA4     168            mov HEX5, #N_2
+0123 758E82     169            mov HEX4, #N_6
+0126 759498     170            mov HEX3, #N_9
+0129 7593A4     171            mov HEX2, #N_5
+012C 7592F9     172            mov HEX1, #N_1
+012F 7591F9     173            mov HEX0, #N_1
+0132 120041     174            lcall wait_1_sec
+0135 758FC0     175            mov HEX5, #N_0
+0138 758EA4     176            mov HEX4, #N_2
+013B 759482     177            mov HEX3, #N_6
+013E 759398     178            mov HEX2, #N_9
+0141 7592A4     179            mov HEX1, #N_5
+0144 7591F9     180            mov HEX0, #N_1
+0147 120041     181            lcall wait_1_sec
+014A 758F82     182            mov HEX5, #N_6
+014D 758EC0     183            mov HEX4, #N_0
+0150 7594A4     184            mov HEX3, #N_2
+0153 759382     185            mov HEX2, #N_6
+0156 759298     186            mov HEX1, #N_9
+0159 7591A4     187            mov HEX0, #N_5
+015C 120041     188            lcall wait_1_sec
+015F 758FF9     189            mov HEX5, #N_1
+0162 758E82     190            mov HEX4, #N_6
+0165 7594C0     191            mov HEX3, #N_0
+0168 7593A4     192            mov HEX2, #N_2
+016B 759282     193            mov HEX1, #N_6
+016E 759198     194            mov HEX0, #N_9
+0171 120041     195            lcall wait_1_sec
+0174 758FF9     196            mov HEX5, #N_1
+0177 758EF9     197            mov HEX4, #N_1
+017A 759482     198            mov HEX3, #N_6
+017D 7593C0     199            mov HEX2, #N_0
+0180 7592A4     200            mov HEX1, #N_2
+0183 759182     201            mov HEX0, #N_6
+0186 120041     202            lcall wait_1_sec
+0189 758FA4     203            mov HEX5, #N_5
+018C 758EF9     204            mov HEX4, #N_1
+018F 7594F9     205            mov HEX3, #N_1
+0192 759382     206            mov HEX2, #N_6
+0195 7592C0     207            mov HEX1, #N_0
+0198 7591A4     208            mov HEX0, #N_2
+019B 120041     209            lcall wait_1_sec
+019E 758F98     210            mov HEX5, #N_9
+01A1 758EA4     211            mov HEX4, #N_5
+01A4 7594F9     212            mov HEX3, #N_1
+01A7 7593F9     213            mov HEX2, #N_1
+01AA 759282     214            mov HEX1, #N_6
+01AD 7591C0     215            mov HEX0, #N_0
+01B0 120041     216            lcall wait_1_sec
+01B3 758F82     217            mov HEX5, #N_6
+01B6 758E98     218            mov HEX4, #N_9
+01B9 7594A4     219            mov HEX3, #N_5
+01BC 7593F9     220            mov HEX2, #N_1
+01BF 7592F9     221            mov HEX1, #N_1
+01C2 759182     222            mov HEX0, #N_6
+01C5 120041     223            lcall wait_1_sec
+01C8 22         224            ret
+01C9            225   
+01C9            226   case_100:
+01C9            227            ; Make the six least significant digits of your student number blink every second.
+01C9            228            ; This should keep going forever until the selection for SW2 down to SW0 is changed. For
+01C9            229            ; example: “345678”, “ “, “345678”, “ “, etc. 
+01C9 758F98     230            mov HEX5, #N_9
+01CC 758EA4     231            mov HEX4, #N_5
+01CF 7594F9     232            mov HEX3, #N_1
+01D2 7593F9     233            mov HEX2, #N_1
+01D5 759282     234            mov HEX1, #N_6
+01D8 7591C0     235            mov HEX0, #N_0
+01DB 120041     236            lcall wait_1_sec
+01DE 758FFF     237            mov HEX5, #BLANK
+01E1 758EFF     238            mov HEX4, #BLANK
+01E4 7594FF     239            mov HEX3, #BLANK
+01E7 7593FF     240            mov HEX2, #BLANK
+01EA 7592FF     241            mov HEX1, #BLANK
+01ED 7591FF     242            mov HEX0, #BLANK
+01F0 120041     243            lcall wait_1_sec
+01F3            244   
+01F3            245   case_101:
+01F3            246            ; Make the six most significant digits of your student number appear one at time
+01F3            247            ; every second, starting with a blank display. This should keep going forever until the
+01F3            248            ; selection for SW2 down to SW0 is changed. For example: “ “, “1 ”, “12 ”,
+01F3            249            ; “123 ”, “1234 ”, “12345 ”, “123456”, “ “,“1 ”, etc. 
+01F3 758FFF     250            mov HEX5, #BLANK
+01F6 758EFF     251            mov HEX4, #BLANK
+01F9 7594FF     252            mov HEX3, #BLANK
+01FC 7593FF     253            mov HEX2, #BLANK
+01FF 7592FF     254            mov HEX1, #BLANK
+0202 7591FF     255            mov HEX0, #BLANK
+0205 120041     256            lcall wait_1_sec
+0208 758FA4     257            mov HEX5, #N_2
+020B 758EFF     258            mov HEX4, #BLANK
+020E 7594FF     259            mov HEX3, #BLANK
+0211 7593FF     260            mov HEX2, #BLANK
+0214 7592FF     261            mov HEX1, #BLANK
+0217 7591FF     262            mov HEX0, #BLANK
+021A 120041     263            lcall wait_1_sec
+021D 758FA4     264            mov HEX5, #N_2
+0220 758E82     265            mov HEX4, #N_6
+0223 7594FF     266            mov HEX3, #BLANK
+0226 7593FF     267            mov HEX2, #BLANK
+0229 7592FF     268            mov HEX1, #BLANK
+022C 7591FF     269            mov HEX0, #BLANK
+022F 120041     270            lcall wait_1_sec
+0232 758FA4     271            mov HEX5, #N_2
+0235 758E82     272            mov HEX4, #N_6
+0238 759498     273            mov HEX3, #N_9
+023B 7593FF     274            mov HEX2, #BLANK
+023E 7592FF     275            mov HEX1, #BLANK
+0241 7591FF     276            mov HEX0, #BLANK
+0244 120041     277            lcall wait_1_sec
+0247 758FA4     278            mov HEX5, #N_2
+024A 758E82     279            mov HEX4, #N_6
+024D 759498     280            mov HEX3, #N_9
+0250 7593A4     281            mov HEX2, #N_5
+0253 7592FF     282            mov HEX1, #BLANK
+0256 7591FF     283            mov HEX0, #BLANK
+0259 120041     284            lcall wait_1_sec
+025C 758FA4     285            mov HEX5, #N_2
+025F 758E82     286            mov HEX4, #N_6
+0262 759498     287            mov HEX3, #N_9
+0265 7593A4     288            mov HEX2, #N_5
+0268 7592F9     289            mov HEX1, #N_1
+026B 7591FF     290            mov HEX0, #BLANK
+026E 120041     291            lcall wait_1_sec
+0271 758FA4     292            mov HEX5, #N_2
+0274 758E82     293            mov HEX4, #N_6
+0277 759498     294            mov HEX3, #N_9
+027A 7593A4     295            mov HEX2, #N_5
+027D 7592F9     296            mov HEX1, #N_1
+0280 7591F9     297            mov HEX0, #N_1
+0283 22         298            ret
+0284            299   
+0284            300   case_110:
+0284            301            ; Display “HELLO ” for one second, then the six most significant digits of your student
+0284            302            ; number for one second (for example “123456”), followed by “CPN312” for one second.
+0284            303            ; This should keep going forever until the selection for SW2 down to SW0 is changed.
+0284 758FC6     304            mov HEX5, #L_H
+0287 758E86     305            mov HEX4, #L_E
+028A 7594C6     306            mov HEX3, #L_L
+028D 7593C6     307            mov HEX2, #L_L
+0290 7592C6     308            mov HEX1, #L_O
+0293 7591FF     309            mov HEX0, #BLANK
+0296 120041     310            lcall wait_1_sec
+0299 120051     311            lcall case_000
+029C 120041     312            lcall wait_1_sec
+029F 758FC6     313            mov HEX5, #L_C
+02A2 758EC6     314            mov HEX4, #L_P
+02A5 7594C6     315            mov HEX3, #L_N
+02A8 7593C0     316            mov HEX2, #N_3
+02AB 7592A4     317            mov HEX1, #N_2
+02AE 7591F9     318            mov HEX0, #N_1
+02B1 120041     319            lcall wait_1_sec
+02B4 22         320            ret
+02B5            321            
+02B5            322   case_111:
+02B5            323            ; Display your student number (or part of it) using a format of your own creation that
+02B5            324            ; is different from any of the formats required above. 
+02B5            325            ; display in base 18: e4d4ac
+02B5 758F86     326            mov HEX5, #L_E
+02B8 758E99     327            mov HEX4, #N_4
+02BB 7594A1     328            mov HEX3, #L_D
+02BE 759399     329            mov HEX2, #N_4
+02C1 759288     330            mov HEX1, #L_A
+02C4 7591C6     331            mov HEX0, #L_C
+02C7 22         332            ret
