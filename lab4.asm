@@ -4,18 +4,18 @@ $MODDE0CV ; Sets some sort of mode
 	; the student number is “12345678”. 
 
 	; Define student number
-N_2 equ 01100001b
-N_6 equ 01100001b
-N_9 equ 01100001b
-N_5 equ 01100001b
-N_1 equ 01100001b
-N_0 equ 01100001b
-BLANK equ 01111111b
-L_E equ 01100001b
-N_4 equ 01100001b
-L_D equ 01100001b
-L_A equ 01100001b
-L_C equ 01100001b
+N_2 equ 10100100b
+N_6 equ 10000010b
+N_9 equ 10011000b
+N_5 equ 10100100b
+N_1 equ 11111001b
+N_0 equ 11000000b
+BLANK equ 11111111b
+L_E equ 10000110b
+N_4 equ 10011001b
+L_D equ 10100001b
+L_A equ 10001000b
+L_C equ 11000110b
 
 org 0
 	ljmp init
@@ -96,17 +96,145 @@ case_010:
 	; to the left every second. This should keep going forever until the selection for SW2
 	; down to SW0 is changed. For example: “123456”, “234567”, “345678”, “456781”,
 	; “567812”, “678123”, etc. 
+	mov HEX5, #N_2
+	mov HEX4, #N_6
+	mov HEX3, #N_9
+	mov HEX2, #N_5
+	mov HEX1, #N_1
+	mov HEX0, #N_1
+	lcall wait_1_sec
+	mov HEX5, #N_6
+	mov HEX4, #N_9
+	mov HEX3, #N_5
+	mov HEX2, #N_1
+	mov HEX1, #N_1
+	mov HEX0, #N_6
+	lcall wait_1_sec
+	mov HEX5, #N_9
+	mov HEX4, #N_5
+	mov HEX3, #N_1
+	mov HEX2, #N_1
+	mov HEX1, #N_6
+	mov HEX0, #N_0
+	lcall wait_1_sec
+	mov HEX5, #N_5
+	mov HEX4, #N_1
+	mov HEX3, #N_1
+	mov HEX2, #N_6
+	mov HEX1, #N_0
+	mov HEX0, #N_2
+	lcall wait_1_sec
+	mov HEX5, #N_1
+	mov HEX4, #N_1
+	mov HEX3, #N_6
+	mov HEX2, #N_0
+	mov HEX1, #N_2
+	mov HEX0, #N_6
+	lcall wait_1_sec
+	mov HEX5, #N_1
+	mov HEX4, #N_6
+	mov HEX3, #N_0
+	mov HEX2, #N_2
+	mov HEX1, #N_6
+	mov HEX0, #N_9
+	lcall wait_1_sec
+	mov HEX5, #N_6
+	mov HEX4, #N_0
+	mov HEX3, #N_2
+	mov HEX2, #N_6
+	mov HEX1, #N_9
+	mov HEX0, #N_5
+	lcall wait_1_sec
+	mov HEX5, #N_0
+	mov HEX4, #N_2
+	mov HEX3, #N_6
+	mov HEX2, #N_9
+	mov HEX1, #N_5
+	mov HEX0, #N_1
+	lcall wait_1_sec
+	ret
 
 case_011:
 	; Starting with the six most significant digits of your student number, scroll the digits
 	; of your student number one digit to the right every second. This should keep going
 	; forever until the selection for SW2 down to SW0 is changed. For example: “123456”,
 	; “812345”, “781234”, “678123”, “567812”, “456781”, etc. 
+	mov HEX5, #N_2
+	mov HEX4, #N_6
+	mov HEX3, #N_9
+	mov HEX2, #N_5
+	mov HEX1, #N_1
+	mov HEX0, #N_1
+	lcall wait_1_sec
+	mov HEX5, #N_0
+	mov HEX4, #N_2
+	mov HEX3, #N_6
+	mov HEX2, #N_9
+	mov HEX1, #N_5
+	mov HEX0, #N_1
+	lcall wait_1_sec
+	mov HEX5, #N_6
+	mov HEX4, #N_0
+	mov HEX3, #N_2
+	mov HEX2, #N_6
+	mov HEX1, #N_9
+	mov HEX0, #N_5
+	lcall wait_1_sec
+	mov HEX5, #N_1
+	mov HEX4, #N_6
+	mov HEX3, #N_0
+	mov HEX2, #N_2
+	mov HEX1, #N_6
+	mov HEX0, #N_9
+	lcall wait_1_sec
+	mov HEX5, #N_1
+	mov HEX4, #N_1
+	mov HEX3, #N_6
+	mov HEX2, #N_0
+	mov HEX1, #N_2
+	mov HEX0, #N_6
+	lcall wait_1_sec
+	mov HEX5, #N_5
+	mov HEX4, #N_1
+	mov HEX3, #N_1
+	mov HEX2, #N_6
+	mov HEX1, #N_0
+	mov HEX0, #N_2
+	lcall wait_1_sec
+	mov HEX5, #N_9
+	mov HEX4, #N_5
+	mov HEX3, #N_1
+	mov HEX2, #N_1
+	mov HEX1, #N_6
+	mov HEX0, #N_0
+	lcall wait_1_sec
+	mov HEX5, #N_6
+	mov HEX4, #N_9
+	mov HEX3, #N_5
+	mov HEX2, #N_1
+	mov HEX1, #N_1
+	mov HEX0, #N_6
+	lcall wait_1_sec
+	ret
 
 case_100:
 	; Make the six least significant digits of your student number blink every second.
 	; This should keep going forever until the selection for SW2 down to SW0 is changed. For
 	; example: “345678”, “ “, “345678”, “ “, etc. 
+	mov HEX5, #N_9
+	mov HEX4, #N_5
+	mov HEX3, #N_1
+	mov HEX2, #N_1
+	mov HEX1, #N_6
+	mov HEX0, #N_0
+	lcall wait_1_sec
+	mov HEX5, #BLANK
+	mov HEX4, #BLANK
+	mov HEX3, #BLANK
+	mov HEX2, #BLANK
+	mov HEX1, #BLANK
+	mov HEX0, #BLANK
+	lcall wait_1_sec
 
 case_101:
 	; Make the six most significant digits of your student number appear one at time
