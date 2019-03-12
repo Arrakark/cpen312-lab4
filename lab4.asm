@@ -7,69 +7,74 @@ $MODDE0CV ; Sets some sort of mode
 N_2 equ 10100100b
 N_6 equ 10000010b
 N_9 equ 10011000b
-N_5 equ 10100100b
+N_5 equ 10010010b
 N_1 equ 11111001b
 N_0 equ 11000000b
-N_3 equ 11000000b
+N_3 equ 10110000b
 BLANK equ 11111111b
 L_E equ 10000110b
 N_4 equ 10011001b
 L_D equ 10100001b
 L_A equ 10001000b
 L_C equ 11000110b
-L_H equ 11000110b
-L_L equ 11000110b
-L_O equ 11000110b
-L_P equ 11000110b
-L_N equ 11000110b
+L_H equ 10001001b
+L_L equ 11001111b
+L_O equ 11000000b
+L_P equ 10001100b
+L_N equ 10101011b
 
 org 0
 	ljmp init
 	
 init:
 	mov SP, #0x7f ; Initialize the stack
-	ljmp main_poll
+	lcall case_000
+	lcall wait_1_sec
 	
-main_poll:
+set_state:
 	; Call different functions based on the latching of SW2 down to SW0
 	jb KEY.3, cont ; jump if 1 (key is not pressed)
 	; set new command (state of switches) into R1
-	mov R1, SWA
-	mov A, R1 ; need to invert buttons since they are active low
-	cpl A
-	mov R1, A
+	mov R0, SWA
+	mov A, R0 ; need to invert buttons since they are active low
+	;cpl A
+	mov R0, A
+	mov LEDRA, R0
 cont:
+	mov A, R0
 	; Execute last command
-	CJNE R1, #0, cc1 ; branches to the specified destination if their values are not equal
+	CJNE A, #0, cc1 ; branches to the specified destination if their values are not equal
 	lcall case_000
 cc1: 
-	CJNE R1, #1, cc2
+	CJNE A, #1, cc2
 	lcall case_001
 cc2: 
-	CJNE R1, #2, cc3
+	CJNE A, #2, cc3
 	lcall case_010
 cc3: 
-	CJNE R1, #3, cc4
+	CJNE A, #3, cc4
 	lcall case_011
 cc4: 
-	CJNE R1, #4, cc5
+	CJNE A, #4, cc5
 	lcall case_100
 cc5: 
-	CJNE R1, #5, cc6
+	CJNE A, #5, cc6
 	lcall case_101
 cc6: 
-	CJNE R1, #6, cc7
+	CJNE A, #6, cc7
 	lcall case_110
 cc7: 
+	CJNE A, #7, other
 	lcall case_111
-	lcall main_poll
+other:
+	lcall set_state
 	
 wait_1_sec:
     mov R3, #180  ; 90 is 5AH
 L3: mov R2, #250 ; 250 is FAH 
 L2: mov R1, #250
 L1: djnz R1, L1  ; 3 machine cycles-> 3*30ns*250=22.5us
-	jb KEY.3, main_poll ; if the key is pressed jump immediately back to the main loop
+	jnb KEY.3, set_state ; if the key is pressed jump immediately back to the main loop
     djnz R2, L2  ; 22.5us*250=5.625ms
     djnz R3, L3  ; 5.625ms*180=1s (approximately)
 	ret
@@ -241,6 +246,7 @@ case_100:
 	mov HEX1, #BLANK
 	mov HEX0, #BLANK
 	lcall wait_1_sec
+	ret
 
 case_101:
 	; Make the six most significant digits of your student number appear one at time
@@ -295,6 +301,7 @@ case_101:
 	mov HEX2, #N_5
 	mov HEX1, #N_1
 	mov HEX0, #N_1
+	lcall wait_1_sec
 	ret
 
 case_110:
@@ -314,8 +321,8 @@ case_110:
 	mov HEX4, #L_P
 	mov HEX3, #L_N
 	mov HEX2, #N_3
-	mov HEX1, #N_2
 	mov HEX0, #N_1
+	mov HEX1, #N_2
 	lcall wait_1_sec
 	ret
 	

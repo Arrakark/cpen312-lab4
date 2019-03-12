@@ -155,326 +155,333 @@
 0000              7   N_2 equ 10100100b
 0000              8   N_6 equ 10000010b
 0000              9   N_9 equ 10011000b
-0000             10   N_5 equ 10100100b
+0000             10   N_5 equ 10010010b
 0000             11   N_1 equ 11111001b
 0000             12   N_0 equ 11000000b
-0000             13   N_3 equ 11000000b
+0000             13   N_3 equ 10110000b
 0000             14   BLANK equ 11111111b
 0000             15   L_E equ 10000110b
 0000             16   N_4 equ 10011001b
 0000             17   L_D equ 10100001b
 0000             18   L_A equ 10001000b
 0000             19   L_C equ 11000110b
-0000             20   L_H equ 11000110b
-0000             21   L_L equ 11000110b
-0000             22   L_O equ 11000110b
-0000             23   L_P equ 11000110b
-0000             24   L_N equ 11000110b
+0000             20   L_H equ 10001001b
+0000             21   L_L equ 11001111b
+0000             22   L_O equ 11000000b
+0000             23   L_P equ 10001100b
+0000             24   L_N equ 10101011b
 0000             25   
 0000             26   org 0
 0000 020003      27            ljmp init
 0003             28            
 0003             29   init:
 0003 75817F      30            mov SP, #0x7f ; Initialize the stack
-0006 020009      31            ljmp main_poll
-0009             32            
-0009             33   main_poll:
-0009             34            ; Call different functions based on the latching of SW2 down to SW0
-0009 20FB05      35            jb KEY.3, cont ; jump if 1 (key is not pressed)
-000C             36            ; set new command (state of switches) into R1
-000C A9E8        37            mov R1, SWA
-000E E9          38            mov A, R1 ; need to invert buttons since they are active low
-000F F4          39            cpl A
-0010 F9          40            mov R1, A
-0011             41   cont:
-0011             42            ; Execute last command
-0011 B90003      43            CJNE R1, #0, cc1 ; branches to the specified destination if their values are not equal
-0014 120051      44            lcall case_000
-0017             45   cc1: 
-0017 B90103      46            CJNE R1, #1, cc2
-001A 120064      47            lcall case_001
-001D             48   cc2: 
-001D B90203      49            CJNE R1, #2, cc3
-0020 120077      50            lcall case_010
-0023             51   cc3: 
-0023 B90303      52            CJNE R1, #3, cc4
-0026 120120      53            lcall case_011
-0029             54   cc4: 
-0029 B90403      55            CJNE R1, #4, cc5
-002C 1201C9      56            lcall case_100
-002F             57   cc5: 
-002F B90503      58            CJNE R1, #5, cc6
-0032 1201F3      59            lcall case_101
-0035             60   cc6: 
-0035 B90603      61            CJNE R1, #6, cc7
-0038 120284      62            lcall case_110
-003B             63   cc7: 
-003B 1202B5      64            lcall case_111
-003E 120009      65            lcall main_poll
-0041             66            
-0041             67   wait_1_sec:
-0041 7BB4        68       mov R3, #180  ; 90 is 5AH
-0043 7AFA        69   L3: mov R2, #250 ; 250 is FAH 
-0045 79FA        70   L2: mov R1, #250
-0047 D9FE        71   L1: djnz R1, L1  ; 3 machine cycles-> 3*30ns*250=22.5us
-0049 20FBBD      72            jb KEY.3, main_poll ; if the key is pressed jump immediately back to the main loop
-004C DAF7        73       djnz R2, L2  ; 22.5us*250=5.625ms
-004E DBF3        74       djnz R3, L3  ; 5.625ms*180=1s (approximately)
-0050 22          75            ret
-0051             76   
-0051             77   case_000:
-0051             78            ; Display the six most significant digits of your student number using HEX5 down to
-0051             79            ; HEX0. For example: “123456” 
-0051 758FA4      80            mov HEX5, #N_2
-0054 758E82      81            mov HEX4, #N_6
-0057 759498      82            mov HEX3, #N_9
-005A 7593A4      83            mov HEX2, #N_5
-005D 7592F9      84            mov HEX1, #N_1
-0060 7591F9      85            mov HEX0, #N_1
-0063 22          86            ret
-0064             87   
-0064             88   
-0064             89   case_001:
-0064             90            ; Display the two least significant digits of your student number using HEX1 and
-0064             91            ; HEX0. Keep HEX5 down to HEX2 blank. For example: “ 78”
-0064 758FFF      92            mov HEX5, #BLANK
-0067 758EFF      93            mov HEX4, #BLANK
-006A 7594FF      94            mov HEX3, #BLANK
-006D 7593FF      95            mov HEX2, #BLANK
-0070 759282      96            mov HEX1, #N_6
-0073 7591C0      97            mov HEX0, #N_0
-0076 22          98            ret
-0077             99   
-0077            100   case_010:
-0077            101            ;  Starting with the six most significant digits of your student number, scroll one digit
-0077            102            ; to the left every second. This should keep going forever until the selection for SW2
-0077            103            ; down to SW0 is changed. For example: “123456”, “234567”, “345678”, “456781”,
-0077            104            ; “567812”, “678123”, etc. 
-0077 758FA4     105            mov HEX5, #N_2
-007A 758E82     106            mov HEX4, #N_6
-007D 759498     107            mov HEX3, #N_9
-0080 7593A4     108            mov HEX2, #N_5
-0083 7592F9     109            mov HEX1, #N_1
-0086 7591F9     110            mov HEX0, #N_1
-0089 120041     111            lcall wait_1_sec
-008C 758F82     112            mov HEX5, #N_6
-008F 758E98     113            mov HEX4, #N_9
-0092 7594A4     114            mov HEX3, #N_5
-0095 7593F9     115            mov HEX2, #N_1
-0098 7592F9     116            mov HEX1, #N_1
-009B 759182     117            mov HEX0, #N_6
-009E 120041     118            lcall wait_1_sec
-00A1 758F98     119            mov HEX5, #N_9
-00A4 758EA4     120            mov HEX4, #N_5
-00A7 7594F9     121            mov HEX3, #N_1
-00AA 7593F9     122            mov HEX2, #N_1
-00AD 759282     123            mov HEX1, #N_6
-00B0 7591C0     124            mov HEX0, #N_0
-00B3 120041     125            lcall wait_1_sec
-00B6 758FA4     126            mov HEX5, #N_5
-00B9 758EF9     127            mov HEX4, #N_1
-00BC 7594F9     128            mov HEX3, #N_1
-00BF 759382     129            mov HEX2, #N_6
-00C2 7592C0     130            mov HEX1, #N_0
-00C5 7591A4     131            mov HEX0, #N_2
-00C8 120041     132            lcall wait_1_sec
-00CB 758FF9     133            mov HEX5, #N_1
-00CE 758EF9     134            mov HEX4, #N_1
-00D1 759482     135            mov HEX3, #N_6
-00D4 7593C0     136            mov HEX2, #N_0
-00D7 7592A4     137            mov HEX1, #N_2
-00DA 759182     138            mov HEX0, #N_6
-00DD 120041     139            lcall wait_1_sec
-00E0 758FF9     140            mov HEX5, #N_1
-00E3 758E82     141            mov HEX4, #N_6
-00E6 7594C0     142            mov HEX3, #N_0
-00E9 7593A4     143            mov HEX2, #N_2
-00EC 759282     144            mov HEX1, #N_6
-00EF 759198     145            mov HEX0, #N_9
-00F2 120041     146            lcall wait_1_sec
-00F5 758F82     147            mov HEX5, #N_6
-00F8 758EC0     148            mov HEX4, #N_0
-00FB 7594A4     149            mov HEX3, #N_2
-00FE 759382     150            mov HEX2, #N_6
-0101 759298     151            mov HEX1, #N_9
-0104 7591A4     152            mov HEX0, #N_5
-0107 120041     153            lcall wait_1_sec
-010A 758FC0     154            mov HEX5, #N_0
-010D 758EA4     155            mov HEX4, #N_2
-0110 759482     156            mov HEX3, #N_6
-0113 759398     157            mov HEX2, #N_9
-0116 7592A4     158            mov HEX1, #N_5
-0119 7591F9     159            mov HEX0, #N_1
-011C 120041     160            lcall wait_1_sec
-011F 22         161            ret
-0120            162   
-0120            163   case_011:
-0120            164            ; Starting with the six most significant digits of your student number, scroll the digits
-0120            165            ; of your student number one digit to the right every second. This should keep going
-0120            166            ; forever until the selection for SW2 down to SW0 is changed. For example: “123456”,
-0120            167            ; “812345”, “781234”, “678123”, “567812”, “456781”, etc. 
-0120 758FA4     168            mov HEX5, #N_2
-0123 758E82     169            mov HEX4, #N_6
-0126 759498     170            mov HEX3, #N_9
-0129 7593A4     171            mov HEX2, #N_5
-012C 7592F9     172            mov HEX1, #N_1
-012F 7591F9     173            mov HEX0, #N_1
-0132 120041     174            lcall wait_1_sec
-0135 758FC0     175            mov HEX5, #N_0
-0138 758EA4     176            mov HEX4, #N_2
-013B 759482     177            mov HEX3, #N_6
-013E 759398     178            mov HEX2, #N_9
-0141 7592A4     179            mov HEX1, #N_5
-0144 7591F9     180            mov HEX0, #N_1
-0147 120041     181            lcall wait_1_sec
-014A 758F82     182            mov HEX5, #N_6
-014D 758EC0     183            mov HEX4, #N_0
-0150 7594A4     184            mov HEX3, #N_2
-0153 759382     185            mov HEX2, #N_6
-0156 759298     186            mov HEX1, #N_9
-0159 7591A4     187            mov HEX0, #N_5
-015C 120041     188            lcall wait_1_sec
-015F 758FF9     189            mov HEX5, #N_1
-0162 758E82     190            mov HEX4, #N_6
-0165 7594C0     191            mov HEX3, #N_0
-0168 7593A4     192            mov HEX2, #N_2
-016B 759282     193            mov HEX1, #N_6
-016E 759198     194            mov HEX0, #N_9
-0171 120041     195            lcall wait_1_sec
-0174 758FF9     196            mov HEX5, #N_1
-0177 758EF9     197            mov HEX4, #N_1
-017A 759482     198            mov HEX3, #N_6
-017D 7593C0     199            mov HEX2, #N_0
-0180 7592A4     200            mov HEX1, #N_2
-0183 759182     201            mov HEX0, #N_6
-0186 120041     202            lcall wait_1_sec
-0189 758FA4     203            mov HEX5, #N_5
-018C 758EF9     204            mov HEX4, #N_1
-018F 7594F9     205            mov HEX3, #N_1
-0192 759382     206            mov HEX2, #N_6
-0195 7592C0     207            mov HEX1, #N_0
-0198 7591A4     208            mov HEX0, #N_2
-019B 120041     209            lcall wait_1_sec
-019E 758F98     210            mov HEX5, #N_9
-01A1 758EA4     211            mov HEX4, #N_5
-01A4 7594F9     212            mov HEX3, #N_1
-01A7 7593F9     213            mov HEX2, #N_1
-01AA 759282     214            mov HEX1, #N_6
-01AD 7591C0     215            mov HEX0, #N_0
-01B0 120041     216            lcall wait_1_sec
-01B3 758F82     217            mov HEX5, #N_6
-01B6 758E98     218            mov HEX4, #N_9
-01B9 7594A4     219            mov HEX3, #N_5
-01BC 7593F9     220            mov HEX2, #N_1
-01BF 7592F9     221            mov HEX1, #N_1
-01C2 759182     222            mov HEX0, #N_6
-01C5 120041     223            lcall wait_1_sec
-01C8 22         224            ret
-01C9            225   
-01C9            226   case_100:
-01C9            227            ; Make the six least significant digits of your student number blink every second.
-01C9            228            ; This should keep going forever until the selection for SW2 down to SW0 is changed. For
-01C9            229            ; example: “345678”, “ “, “345678”, “ “, etc. 
-01C9 758F98     230            mov HEX5, #N_9
-01CC 758EA4     231            mov HEX4, #N_5
-01CF 7594F9     232            mov HEX3, #N_1
-01D2 7593F9     233            mov HEX2, #N_1
-01D5 759282     234            mov HEX1, #N_6
-01D8 7591C0     235            mov HEX0, #N_0
-01DB 120041     236            lcall wait_1_sec
-01DE 758FFF     237            mov HEX5, #BLANK
-01E1 758EFF     238            mov HEX4, #BLANK
-01E4 7594FF     239            mov HEX3, #BLANK
-01E7 7593FF     240            mov HEX2, #BLANK
-01EA 7592FF     241            mov HEX1, #BLANK
-01ED 7591FF     242            mov HEX0, #BLANK
-01F0 120041     243            lcall wait_1_sec
-01F3            244   
-01F3            245   case_101:
-01F3            246            ; Make the six most significant digits of your student number appear one at time
-01F3            247            ; every second, starting with a blank display. This should keep going forever until the
-01F3            248            ; selection for SW2 down to SW0 is changed. For example: “ “, “1 ”, “12 ”,
-01F3            249            ; “123 ”, “1234 ”, “12345 ”, “123456”, “ “,“1 ”, etc. 
-01F3 758FFF     250            mov HEX5, #BLANK
-01F6 758EFF     251            mov HEX4, #BLANK
-01F9 7594FF     252            mov HEX3, #BLANK
-01FC 7593FF     253            mov HEX2, #BLANK
-01FF 7592FF     254            mov HEX1, #BLANK
-0202 7591FF     255            mov HEX0, #BLANK
-0205 120041     256            lcall wait_1_sec
-0208 758FA4     257            mov HEX5, #N_2
-020B 758EFF     258            mov HEX4, #BLANK
-020E 7594FF     259            mov HEX3, #BLANK
-0211 7593FF     260            mov HEX2, #BLANK
-0214 7592FF     261            mov HEX1, #BLANK
-0217 7591FF     262            mov HEX0, #BLANK
-021A 120041     263            lcall wait_1_sec
-021D 758FA4     264            mov HEX5, #N_2
-0220 758E82     265            mov HEX4, #N_6
-0223 7594FF     266            mov HEX3, #BLANK
-0226 7593FF     267            mov HEX2, #BLANK
-0229 7592FF     268            mov HEX1, #BLANK
-022C 7591FF     269            mov HEX0, #BLANK
-022F 120041     270            lcall wait_1_sec
-0232 758FA4     271            mov HEX5, #N_2
-0235 758E82     272            mov HEX4, #N_6
-0238 759498     273            mov HEX3, #N_9
-023B 7593FF     274            mov HEX2, #BLANK
-023E 7592FF     275            mov HEX1, #BLANK
-0241 7591FF     276            mov HEX0, #BLANK
-0244 120041     277            lcall wait_1_sec
-0247 758FA4     278            mov HEX5, #N_2
-024A 758E82     279            mov HEX4, #N_6
-024D 759498     280            mov HEX3, #N_9
-0250 7593A4     281            mov HEX2, #N_5
-0253 7592FF     282            mov HEX1, #BLANK
-0256 7591FF     283            mov HEX0, #BLANK
-0259 120041     284            lcall wait_1_sec
-025C 758FA4     285            mov HEX5, #N_2
-025F 758E82     286            mov HEX4, #N_6
-0262 759498     287            mov HEX3, #N_9
-0265 7593A4     288            mov HEX2, #N_5
-0268 7592F9     289            mov HEX1, #N_1
-026B 7591FF     290            mov HEX0, #BLANK
-026E 120041     291            lcall wait_1_sec
-0271 758FA4     292            mov HEX5, #N_2
-0274 758E82     293            mov HEX4, #N_6
-0277 759498     294            mov HEX3, #N_9
-027A 7593A4     295            mov HEX2, #N_5
-027D 7592F9     296            mov HEX1, #N_1
-0280 7591F9     297            mov HEX0, #N_1
-0283 22         298            ret
-0284            299   
-0284            300   case_110:
-0284            301            ; Display “HELLO ” for one second, then the six most significant digits of your student
-0284            302            ; number for one second (for example “123456”), followed by “CPN312” for one second.
-0284            303            ; This should keep going forever until the selection for SW2 down to SW0 is changed.
-0284 758FC6     304            mov HEX5, #L_H
-0287 758E86     305            mov HEX4, #L_E
-028A 7594C6     306            mov HEX3, #L_L
-028D 7593C6     307            mov HEX2, #L_L
-0290 7592C6     308            mov HEX1, #L_O
-0293 7591FF     309            mov HEX0, #BLANK
-0296 120041     310            lcall wait_1_sec
-0299 120051     311            lcall case_000
-029C 120041     312            lcall wait_1_sec
-029F 758FC6     313            mov HEX5, #L_C
-02A2 758EC6     314            mov HEX4, #L_P
-02A5 7594C6     315            mov HEX3, #L_N
-02A8 7593C0     316            mov HEX2, #N_3
-02AB 7592A4     317            mov HEX1, #N_2
-02AE 7591F9     318            mov HEX0, #N_1
-02B1 120041     319            lcall wait_1_sec
-02B4 22         320            ret
-02B5            321            
-02B5            322   case_111:
-02B5            323            ; Display your student number (or part of it) using a format of your own creation that
-02B5            324            ; is different from any of the formats required above. 
-02B5            325            ; display in base 18: e4d4ac
-02B5 758F86     326            mov HEX5, #L_E
-02B8 758E99     327            mov HEX4, #N_4
-02BB 7594A1     328            mov HEX3, #L_D
-02BE 759399     329            mov HEX2, #N_4
-02C1 759288     330            mov HEX1, #L_A
-02C4 7591C6     331            mov HEX0, #L_C
-02C7 22         332            ret
+0006 120059      31            lcall case_000
+0009 120049      32            lcall wait_1_sec
+000C             33            
+000C             34   set_state:
+000C             35            ; Call different functions based on the latching of SW2 down to SW0
+000C 20FB06      36            jb KEY.3, cont ; jump if 1 (key is not pressed)
+000F             37            ; set new command (state of switches) into R1
+000F A8E8        38            mov R0, SWA
+0011 E8          39            mov A, R0 ; need to invert buttons since they are active low
+0012             40            ;cpl A
+0012 F8          41            mov R0, A
+0013 88E8        42            mov LEDRA, R0
+0015             43   cont:
+0015 E8          44            mov A, R0
+0016             45            ; Execute last command
+0016 B40003      46            CJNE A, #0, cc1 ; branches to the specified destination if their values are not equal
+0019 120059      47            lcall case_000
+001C             48   cc1: 
+001C B40103      49            CJNE A, #1, cc2
+001F 12006C      50            lcall case_001
+0022             51   cc2: 
+0022 B40203      52            CJNE A, #2, cc3
+0025 12007F      53            lcall case_010
+0028             54   cc3: 
+0028 B40303      55            CJNE A, #3, cc4
+002B 120128      56            lcall case_011
+002E             57   cc4: 
+002E B40403      58            CJNE A, #4, cc5
+0031 1201D1      59            lcall case_100
+0034             60   cc5: 
+0034 B40503      61            CJNE A, #5, cc6
+0037 1201FC      62            lcall case_101
+003A             63   cc6: 
+003A B40603      64            CJNE A, #6, cc7
+003D 120290      65            lcall case_110
+0040             66   cc7: 
+0040 B40703      67            CJNE A, #7, other
+0043 1202C1      68            lcall case_111
+0046             69   other:
+0046 12000C      70            lcall set_state
+0049             71            
+0049             72   wait_1_sec:
+0049 7BB4        73       mov R3, #180  ; 90 is 5AH
+004B 7AFA        74   L3: mov R2, #250 ; 250 is FAH 
+004D 79FA        75   L2: mov R1, #250
+004F D9FE        76   L1: djnz R1, L1  ; 3 machine cycles-> 3*30ns*250=22.5us
+0051 30FBB8      77            jnb KEY.3, set_state ; if the key is pressed jump immediately back to the main loop
+0054 DAF7        78       djnz R2, L2  ; 22.5us*250=5.625ms
+0056 DBF3        79       djnz R3, L3  ; 5.625ms*180=1s (approximately)
+0058 22          80            ret
+0059             81   
+0059             82   case_000:
+0059             83            ; Display the six most significant digits of your student number using HEX5 down to
+0059             84            ; HEX0. For example: “123456” 
+0059 758FA4      85            mov HEX5, #N_2
+005C 758E82      86            mov HEX4, #N_6
+005F 759498      87            mov HEX3, #N_9
+0062 759392      88            mov HEX2, #N_5
+0065 7592F9      89            mov HEX1, #N_1
+0068 7591F9      90            mov HEX0, #N_1
+006B 22          91            ret
+006C             92   
+006C             93   
+006C             94   case_001:
+006C             95            ; Display the two least significant digits of your student number using HEX1 and
+006C             96            ; HEX0. Keep HEX5 down to HEX2 blank. For example: “ 78”
+006C 758FFF      97            mov HEX5, #BLANK
+006F 758EFF      98            mov HEX4, #BLANK
+0072 7594FF      99            mov HEX3, #BLANK
+0075 7593FF     100            mov HEX2, #BLANK
+0078 759282     101            mov HEX1, #N_6
+007B 7591C0     102            mov HEX0, #N_0
+007E 22         103            ret
+007F            104   
+007F            105   case_010:
+007F            106            ;  Starting with the six most significant digits of your student number, scroll one digit
+007F            107            ; to the left every second. This should keep going forever until the selection for SW2
+007F            108            ; down to SW0 is changed. For example: “123456”, “234567”, “345678”, “456781”,
+007F            109            ; “567812”, “678123”, etc. 
+007F 758FA4     110            mov HEX5, #N_2
+0082 758E82     111            mov HEX4, #N_6
+0085 759498     112            mov HEX3, #N_9
+0088 759392     113            mov HEX2, #N_5
+008B 7592F9     114            mov HEX1, #N_1
+008E 7591F9     115            mov HEX0, #N_1
+0091 120049     116            lcall wait_1_sec
+0094 758F82     117            mov HEX5, #N_6
+0097 758E98     118            mov HEX4, #N_9
+009A 759492     119            mov HEX3, #N_5
+009D 7593F9     120            mov HEX2, #N_1
+00A0 7592F9     121            mov HEX1, #N_1
+00A3 759182     122            mov HEX0, #N_6
+00A6 120049     123            lcall wait_1_sec
+00A9 758F98     124            mov HEX5, #N_9
+00AC 758E92     125            mov HEX4, #N_5
+00AF 7594F9     126            mov HEX3, #N_1
+00B2 7593F9     127            mov HEX2, #N_1
+00B5 759282     128            mov HEX1, #N_6
+00B8 7591C0     129            mov HEX0, #N_0
+00BB 120049     130            lcall wait_1_sec
+00BE 758F92     131            mov HEX5, #N_5
+00C1 758EF9     132            mov HEX4, #N_1
+00C4 7594F9     133            mov HEX3, #N_1
+00C7 759382     134            mov HEX2, #N_6
+00CA 7592C0     135            mov HEX1, #N_0
+00CD 7591A4     136            mov HEX0, #N_2
+00D0 120049     137            lcall wait_1_sec
+00D3 758FF9     138            mov HEX5, #N_1
+00D6 758EF9     139            mov HEX4, #N_1
+00D9 759482     140            mov HEX3, #N_6
+00DC 7593C0     141            mov HEX2, #N_0
+00DF 7592A4     142            mov HEX1, #N_2
+00E2 759182     143            mov HEX0, #N_6
+00E5 120049     144            lcall wait_1_sec
+00E8 758FF9     145            mov HEX5, #N_1
+00EB 758E82     146            mov HEX4, #N_6
+00EE 7594C0     147            mov HEX3, #N_0
+00F1 7593A4     148            mov HEX2, #N_2
+00F4 759282     149            mov HEX1, #N_6
+00F7 759198     150            mov HEX0, #N_9
+00FA 120049     151            lcall wait_1_sec
+00FD 758F82     152            mov HEX5, #N_6
+0100 758EC0     153            mov HEX4, #N_0
+0103 7594A4     154            mov HEX3, #N_2
+0106 759382     155            mov HEX2, #N_6
+0109 759298     156            mov HEX1, #N_9
+010C 759192     157            mov HEX0, #N_5
+010F 120049     158            lcall wait_1_sec
+0112 758FC0     159            mov HEX5, #N_0
+0115 758EA4     160            mov HEX4, #N_2
+0118 759482     161            mov HEX3, #N_6
+011B 759398     162            mov HEX2, #N_9
+011E 759292     163            mov HEX1, #N_5
+0121 7591F9     164            mov HEX0, #N_1
+0124 120049     165            lcall wait_1_sec
+0127 22         166            ret
+0128            167   
+0128            168   case_011:
+0128            169            ; Starting with the six most significant digits of your student number, scroll the digits
+0128            170            ; of your student number one digit to the right every second. This should keep going
+0128            171            ; forever until the selection for SW2 down to SW0 is changed. For example: “123456”,
+0128            172            ; “812345”, “781234”, “678123”, “567812”, “456781”, etc. 
+0128 758FA4     173            mov HEX5, #N_2
+012B 758E82     174            mov HEX4, #N_6
+012E 759498     175            mov HEX3, #N_9
+0131 759392     176            mov HEX2, #N_5
+0134 7592F9     177            mov HEX1, #N_1
+0137 7591F9     178            mov HEX0, #N_1
+013A 120049     179            lcall wait_1_sec
+013D 758FC0     180            mov HEX5, #N_0
+0140 758EA4     181            mov HEX4, #N_2
+0143 759482     182            mov HEX3, #N_6
+0146 759398     183            mov HEX2, #N_9
+0149 759292     184            mov HEX1, #N_5
+014C 7591F9     185            mov HEX0, #N_1
+014F 120049     186            lcall wait_1_sec
+0152 758F82     187            mov HEX5, #N_6
+0155 758EC0     188            mov HEX4, #N_0
+0158 7594A4     189            mov HEX3, #N_2
+015B 759382     190            mov HEX2, #N_6
+015E 759298     191            mov HEX1, #N_9
+0161 759192     192            mov HEX0, #N_5
+0164 120049     193            lcall wait_1_sec
+0167 758FF9     194            mov HEX5, #N_1
+016A 758E82     195            mov HEX4, #N_6
+016D 7594C0     196            mov HEX3, #N_0
+0170 7593A4     197            mov HEX2, #N_2
+0173 759282     198            mov HEX1, #N_6
+0176 759198     199            mov HEX0, #N_9
+0179 120049     200            lcall wait_1_sec
+017C 758FF9     201            mov HEX5, #N_1
+017F 758EF9     202            mov HEX4, #N_1
+0182 759482     203            mov HEX3, #N_6
+0185 7593C0     204            mov HEX2, #N_0
+0188 7592A4     205            mov HEX1, #N_2
+018B 759182     206            mov HEX0, #N_6
+018E 120049     207            lcall wait_1_sec
+0191 758F92     208            mov HEX5, #N_5
+0194 758EF9     209            mov HEX4, #N_1
+0197 7594F9     210            mov HEX3, #N_1
+019A 759382     211            mov HEX2, #N_6
+019D 7592C0     212            mov HEX1, #N_0
+01A0 7591A4     213            mov HEX0, #N_2
+01A3 120049     214            lcall wait_1_sec
+01A6 758F98     215            mov HEX5, #N_9
+01A9 758E92     216            mov HEX4, #N_5
+01AC 7594F9     217            mov HEX3, #N_1
+01AF 7593F9     218            mov HEX2, #N_1
+01B2 759282     219            mov HEX1, #N_6
+01B5 7591C0     220            mov HEX0, #N_0
+01B8 120049     221            lcall wait_1_sec
+01BB 758F82     222            mov HEX5, #N_6
+01BE 758E98     223            mov HEX4, #N_9
+01C1 759492     224            mov HEX3, #N_5
+01C4 7593F9     225            mov HEX2, #N_1
+01C7 7592F9     226            mov HEX1, #N_1
+01CA 759182     227            mov HEX0, #N_6
+01CD 120049     228            lcall wait_1_sec
+01D0 22         229            ret
+01D1            230   
+01D1            231   case_100:
+01D1            232            ; Make the six least significant digits of your student number blink every second.
+01D1            233            ; This should keep going forever until the selection for SW2 down to SW0 is changed. For
+01D1            234            ; example: “345678”, “ “, “345678”, “ “, etc. 
+01D1 758F98     235            mov HEX5, #N_9
+01D4 758E92     236            mov HEX4, #N_5
+01D7 7594F9     237            mov HEX3, #N_1
+01DA 7593F9     238            mov HEX2, #N_1
+01DD 759282     239            mov HEX1, #N_6
+01E0 7591C0     240            mov HEX0, #N_0
+01E3 120049     241            lcall wait_1_sec
+01E6 758FFF     242            mov HEX5, #BLANK
+01E9 758EFF     243            mov HEX4, #BLANK
+01EC 7594FF     244            mov HEX3, #BLANK
+01EF 7593FF     245            mov HEX2, #BLANK
+01F2 7592FF     246            mov HEX1, #BLANK
+01F5 7591FF     247            mov HEX0, #BLANK
+01F8 120049     248            lcall wait_1_sec
+01FB 22         249            ret
+01FC            250   
+01FC            251   case_101:
+01FC            252            ; Make the six most significant digits of your student number appear one at time
+01FC            253            ; every second, starting with a blank display. This should keep going forever until the
+01FC            254            ; selection for SW2 down to SW0 is changed. For example: “ “, “1 ”, “12 ”,
+01FC            255            ; “123 ”, “1234 ”, “12345 ”, “123456”, “ “,“1 ”, etc. 
+01FC 758FFF     256            mov HEX5, #BLANK
+01FF 758EFF     257            mov HEX4, #BLANK
+0202 7594FF     258            mov HEX3, #BLANK
+0205 7593FF     259            mov HEX2, #BLANK
+0208 7592FF     260            mov HEX1, #BLANK
+020B 7591FF     261            mov HEX0, #BLANK
+020E 120049     262            lcall wait_1_sec
+0211 758FA4     263            mov HEX5, #N_2
+0214 758EFF     264            mov HEX4, #BLANK
+0217 7594FF     265            mov HEX3, #BLANK
+021A 7593FF     266            mov HEX2, #BLANK
+021D 7592FF     267            mov HEX1, #BLANK
+0220 7591FF     268            mov HEX0, #BLANK
+0223 120049     269            lcall wait_1_sec
+0226 758FA4     270            mov HEX5, #N_2
+0229 758E82     271            mov HEX4, #N_6
+022C 7594FF     272            mov HEX3, #BLANK
+022F 7593FF     273            mov HEX2, #BLANK
+0232 7592FF     274            mov HEX1, #BLANK
+0235 7591FF     275            mov HEX0, #BLANK
+0238 120049     276            lcall wait_1_sec
+023B 758FA4     277            mov HEX5, #N_2
+023E 758E82     278            mov HEX4, #N_6
+0241 759498     279            mov HEX3, #N_9
+0244 7593FF     280            mov HEX2, #BLANK
+0247 7592FF     281            mov HEX1, #BLANK
+024A 7591FF     282            mov HEX0, #BLANK
+024D 120049     283            lcall wait_1_sec
+0250 758FA4     284            mov HEX5, #N_2
+0253 758E82     285            mov HEX4, #N_6
+0256 759498     286            mov HEX3, #N_9
+0259 759392     287            mov HEX2, #N_5
+025C 7592FF     288            mov HEX1, #BLANK
+025F 7591FF     289            mov HEX0, #BLANK
+0262 120049     290            lcall wait_1_sec
+0265 758FA4     291            mov HEX5, #N_2
+0268 758E82     292            mov HEX4, #N_6
+026B 759498     293            mov HEX3, #N_9
+026E 759392     294            mov HEX2, #N_5
+0271 7592F9     295            mov HEX1, #N_1
+0274 7591FF     296            mov HEX0, #BLANK
+0277 120049     297            lcall wait_1_sec
+027A 758FA4     298            mov HEX5, #N_2
+027D 758E82     299            mov HEX4, #N_6
+0280 759498     300            mov HEX3, #N_9
+0283 759392     301            mov HEX2, #N_5
+0286 7592F9     302            mov HEX1, #N_1
+0289 7591F9     303            mov HEX0, #N_1
+028C 120049     304            lcall wait_1_sec
+028F 22         305            ret
+0290            306   
+0290            307   case_110:
+0290            308            ; Display “HELLO ” for one second, then the six most significant digits of your student
+0290            309            ; number for one second (for example “123456”), followed by “CPN312” for one second.
+0290            310            ; This should keep going forever until the selection for SW2 down to SW0 is changed.
+0290 758F89     311            mov HEX5, #L_H
+0293 758E86     312            mov HEX4, #L_E
+0296 7594CF     313            mov HEX3, #L_L
+0299 7593CF     314            mov HEX2, #L_L
+029C 7592C0     315            mov HEX1, #L_O
+029F 7591FF     316            mov HEX0, #BLANK
+02A2 120049     317            lcall wait_1_sec
+02A5 120059     318            lcall case_000
+02A8 120049     319            lcall wait_1_sec
+02AB 758FC6     320            mov HEX5, #L_C
+02AE 758E8C     321            mov HEX4, #L_P
+02B1 7594AB     322            mov HEX3, #L_N
+02B4 7593B0     323            mov HEX2, #N_3
+02B7 7591F9     324            mov HEX0, #N_1
+02BA 7592A4     325            mov HEX1, #N_2
+02BD 120049     326            lcall wait_1_sec
+02C0 22         327            ret
+02C1            328            
+02C1            329   case_111:
+02C1            330            ; Display your student number (or part of it) using a format of your own creation that
+02C1            331            ; is different from any of the formats required above. 
+02C1            332            ; display in base 18: e4d4ac
+02C1 758F86     333            mov HEX5, #L_E
+02C4 758E99     334            mov HEX4, #N_4
+02C7 7594A1     335            mov HEX3, #L_D
+02CA 759399     336            mov HEX2, #N_4
+02CD 759288     337            mov HEX1, #L_A
+02D0 7591C6     338            mov HEX0, #L_C
+02D3 22         339            ret
